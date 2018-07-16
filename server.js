@@ -20,6 +20,11 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+//set Handlebars as default layout
+app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+app.set("view engine", "handlebars");
+
+
 
 // If deployed, use the deployed database. Otherwise use the local mongoHeadlines database
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines";
@@ -29,7 +34,7 @@ var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines
 mongoose.Promise = Promise;
 mongoose.connect(MONGODB_URI);
 
-
+//listenign on port 8080!
 app.listen(PORT, () => {
     console.log("Server is running on port:" + PORT)
 });
