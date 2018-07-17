@@ -13,7 +13,7 @@ const app = express();
 
 //const PORT = 8080;
 //variables
-const PORT = process.env.PORT || 8080;
+const PORT = 8080;
 
 var db = require('./models');
 
@@ -33,11 +33,21 @@ app.use(express.static("public"));
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
 
+//Mongo DB connection
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/mongoHeadlines";
+mongoose
+  .connect(MONGODB_URI, {
+    useNewUrlParser: true
+  })
+  .then(() => console.log("Connected to MongoDB..."))
+  .catch(err => console.log("Could not connect to MongoDB", err));
 
 app.use(logger("dev"));
 
 
-
+app.get("/", function(req, res){
+  res.render("index");
+});
 
 
 //scraping the website for articles
@@ -48,18 +58,23 @@ app.get("/scrape", function(req, res){
         var $ = cheerio.load(response.data);
 
 
-        $("div.story-body").each(function(i, element) {
+        $("article").each(function(i, element) {
             // Save an empty result object
             var result = {};
       
             // Add the text and href of every link, and save them as properties of the result object
             result.title = $(this)
-              .children("a")
-              .text();
+              .children("h2")
+              .text()
+              .trim()
             result.link = $(this)
+              .children("h2")
+              .attr("href")
               .children("a")
-              .attr("href");
-      
+            result.summary = $(this)
+            .children(".summary")
+            .text()
+            .trim();
             // Create a new Article using the `result` object built from scraping
             db.Article.create(result)
               .then(function(dbArticle) {
@@ -74,6 +89,7 @@ app.get("/scrape", function(req, res){
       
           // If we were able to successfully scrape and save an Article, send a message to the client
           res.send("Scrape Complete");
+          res.redirect("/");
         
         });
       });
@@ -110,10 +126,7 @@ app.get("/articles/:id", function(req, res) {
   
 
 //get all articles
-app.get("/", function(req, res){
 
-  res.render("index");
-});
 
 app.get("/saved", function(req, res){
 
