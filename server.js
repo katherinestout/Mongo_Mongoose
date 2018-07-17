@@ -32,7 +32,8 @@ app.use(express.static("public"));
 //set Handlebars as default layout
 app.engine("handlebars", exphbs({ defaultLayout: "main" }));
 app.set("view engine", "handlebars");
-app.set("view engine", "handlebars");
+
+
 app.use(logger("dev"));
 
 
@@ -73,6 +74,7 @@ app.get("/scrape", function(req, res){
       
           // If we were able to successfully scrape and save an Article, send a message to the client
           res.send("Scrape Complete");
+        
         });
       });
       
@@ -108,9 +110,9 @@ app.get("/articles/:id", function(req, res) {
   
 
 //get all articles
-app.get("/articles/:id", function(req, res){
+app.get("/", function(req, res){
 
-
+  res.render("index");
 });
 
 app.get("/saved", function(req, res){
