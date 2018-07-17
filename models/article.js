@@ -1,8 +1,8 @@
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-var Schema = mongoose.Schema;
+let Schema = mongoose.Schema;
 
-var ArticleSchema = new Schema ({
+let ArticleSchema = new Schema ({
 
     title: {
         type: String,
@@ -13,18 +13,18 @@ var ArticleSchema = new Schema ({
         required: true
     },
     summary: {
+        type: String,
+        required: true
 
     },
-    updated:{
-
-    },
-    comments:{
+  
+    comments:[{
             type: Schema.Types.ObjectId,
             ref: "Comment"
-    }
+    }]
 
 });
 
-var Article = mongoose.model("Article", ArticleSchema);
+let Article = mongoose.model("Article", ArticleSchema);
 
 module.exports = Article;

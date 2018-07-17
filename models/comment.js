@@ -1,17 +1,17 @@
 //comment schema and comment properties
 
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
 
-var Schema = mongoose.Schema;
+let Schema = mongoose.Schema;
 
-var CommentSchema = new Schema({
+let CommentSchema = new Schema({
     author:{ type: String,
     },
     content:{ type: String
     }
 });
 
-var Comment = mongoose.model("Comment", CommentSchema);
+let Comment = mongoose.model("Comment", CommentSchema);
 
 module.exports = Comment; 
 
