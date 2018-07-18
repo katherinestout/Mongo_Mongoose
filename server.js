@@ -72,7 +72,8 @@ app.get("/scrape", function(req, res) {
   
       // If we were able to successfully scrape and save an Article, send a message to the client
       res.send("Scrape Complete");
-logger("hello");
+      res.redirect("/");
+//logger("hello");
     });
   });
   
@@ -94,6 +95,5 @@ logger("hello");
 app.listen(PORT, function() {
     console.log("App running on port " + PORT + "!");
   });
-  
   
   
