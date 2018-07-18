@@ -1,10 +1,12 @@
-{{#each articles}}
-<div id="wrapper">
-<h1>Mongo Scraper- NYT Edition</h1>
-<p>Headline: {{title}}</p>
-<p>Summary:{{summary}} </p>
-<p>URL: {{link}}</p>
-<p>Comments: {{comments}}</p>
-</div>
-{{/each}}
-<h1>hello</h1>
+
+  <div class= "jumbotron">
+            <button type="button" class="btn btn-info">Saved Articles</button>
+            <button type="button" class="btn btn-info">Scrape New Articles</button>
+            <button type="button" class="btn btn-info">Home</button>
+    
+        {{#each Articles}}
+      <div id="articles"></div>
+      <div id="notes"></div>
+      {{/each}}
+      </div>
+      hello

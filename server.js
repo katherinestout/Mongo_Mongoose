@@ -1,121 +1,87 @@
-//dependencies
-const request = require("request");
-const bodyParser = require("body-parser");
-const express = require("express");
-const exphbs = require("express-handlebars");
-const cheerio = require("cheerio");
-const mongoose = require("mongoose");
+var express = require("express");
+var bodyParser = require("body-parser");
+var logger = require("morgan");
+var mongoose = require("mongoose");
+var request = require("request");
+var exphbs = require("express-handlebars");
+
+//scrapig tools
+
 var axios = require("axios");
-var logger= require("morgan");
+var cheerio = require("cheerio");
+
+//models require
+var db = require("./models");
+var PORT = 8080;
 
 //initialize express
-const app = express();
 
-//const PORT = 8080;
-//variables
-const PORT = 8080;
-
-var db = require('./models');
-
-
-//var db = mongoose.connection;
-
-
-//initialize body parser
-app.use(bodyParser.urlencoded({
-    extended: true
-}));                 
-app.use(bodyParser.json());
-//express.static
+var app = express();
+// Use morgan logger for logging requests
+app.use(logger("dev"));
+// Use body-parser for handling form submissions
+app.use(bodyParser.urlencoded({ extended: true }));
+// Use express.static to serve the public folder as a static directory
 app.use(express.static("public"));
 
-//set Handlebars as default layout
-app.engine("handlebars", exphbs({ defaultLayout: "main" }));
+//set handlebars as default layout
+app.engine("handlebars", exphbs({defaultLayout: "main"}));
 app.set("view engine", "handlebars");
 
-//Mongo DB connection
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017/mongoHeadlines";
-mongoose
-  .connect(MONGODB_URI, {
-    useNewUrlParser: true
-  })
-  .then(() => console.log("Connected to MongoDB..."))
-  .catch(err => console.log("Could not connect to MongoDB", err));
-
-app.use(logger("dev"));
+// Connect to the Mongo DB
+mongoose.connect("mongodb://localhost/ScraperNYTimestimes");
 
 
+//SCRAPER and routes
 app.get("/", function(req, res){
   res.render("index");
 });
 
 
-//scraping the website for articles
-app.get("/scrape", function(req, res){
-//grab the body of the html with request
-   axios.get("https://www.nytimes.com").then(function(response){
-//load the html into cheerio
-        var $ = cheerio.load(response.data);
-
-
-        $("article").each(function(i, element) {
-            // Save an empty result object
-            var result = {};
-      
-            // Add the text and href of every link, and save them as properties of the result object
-            result.title = $(this)
-              .children("h2")
-              .text()
-              .trim()
-            result.link = $(this)
-              .children("h2")
-              .attr("href")
-              .children("a")
-            result.summary = $(this)
-            .children(".summary")
-            .text()
-            .trim();
-            // Create a new Article using the `result` object built from scraping
-            db.Article.create(result)
-              .then(function(dbArticle) {
-                // View the added result in the console
-                console.log(dbArticle);
-              })
-              .catch(function(err) {
-                // If an error occurred, send it to the client
-                return res.json(err);
-              });
+// A GET route for scraping the echoJS website
+app.get("/scrape", function(req, res) {
+    // First, we grab the body of the html with request
+    axios.get("https://www.nytimes.com/section/arts").then(function(response) {
+      // Then, we load that into cheerio and save it to $ for a shorthand selector
+      var $ = cheerio.load(response.data);
+  
+      // Now, we grab every h2 within an article tag, and do the following:
+      $("article h2").each(function(i, element) {
+        // Save an empty result object
+        var result = {};
+  
+        // Add the text and href of every link, and save them as properties of the result object
+        result.title = $(this)
+          .children("a")
+          .text();
+        result.link = $(this)
+          .children("a")
+          .attr("href");
+  
+        // Create a new Article using the `result` object built from scraping
+        db.Article.create(result)
+          .then(function(dbArticle) {
+            // View the added result in the console
+            console.log(dbArticle);
+          })
+          .catch(function(err) {
+            // If an error occurred, send it to the client
+            return res.json(err);
           });
-      
-          // If we were able to successfully scrape and save an Article, send a message to the client
-          res.send("Scrape Complete");
-          res.redirect("/");
-        
-        });
       });
-      
-
-   
-//route to homepage
-app.get("/articles", function(req, res){
+  
+      // If we were able to successfully scrape and save an Article, send a message to the client
+      res.send("Scrape Complete");
+logger("hello");
+    });
+  });
+  
+  // Route for getting all Articles from the db
+  app.get("/articles", function(req, res) {
+    // Grab every document in the Articles collection
     db.Article.find({})
-    .then(function(dbArticle){
-        res.json(dbArticle)
-    })
-.catch(function(err){
-    res.json(err);
-});
-
-});
-
-// Route for grabbing a specific Article by id, populate it with it's note
-app.get("/articles/:id", function(req, res) {
-    // Using the id passed in the id parameter, prepare a query that finds the matching one in our db...
-    db.Article.findOne({ _id: req.params.id })
-      // ..and populate all of the notes associated with it
-      .populate("note")
       .then(function(dbArticle) {
-        // If we were able to successfully find an Article with the given id, send it back to the client
+        // If we were able to successfully find Articles, send them back to the client
         res.json(dbArticle);
       })
       .catch(function(err) {
@@ -123,17 +89,11 @@ app.get("/articles/:id", function(req, res) {
         res.json(err);
       });
   });
+
+  // Start the server
+app.listen(PORT, function() {
+    console.log("App running on port " + PORT + "!");
+  });
   
-
-//get all articles
-
-
-app.get("/saved", function(req, res){
-
-});
-
-
-//listenign on port 8080!
-app.listen(PORT, () => {
-    console.log("Server is running on port:" + PORT)
-});
+  
+  

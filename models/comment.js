@@ -1,17 +1,15 @@
-//comment schema and comment properties
+var mongoose = require("mongoose");
 
-const mongoose = require("mongoose");
+// Save a reference to the Schema constructor
+var Schema = mongoose.Schema;
 
-let Schema = mongoose.Schema;
-
-let CommentSchema = new Schema({
-    author:{ type: String,
-    },
-    content:{ type: String
-    }
+// Using the Schema constructor, create a new UserSchema object
+// This is similar to a Sequelize model
+var CommentSchema = new Schema({
+    commentHead: String,
+    commentText: String
 });
 
-let Comment = mongoose.model("Comment", CommentSchema);
+var Comment = mongoose.model("Comment", CommentSchema);
 
-module.exports = Comment; 
-
+module.exports = Comment;
